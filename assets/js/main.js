@@ -123,9 +123,37 @@
   const ba = S.beforeAfter, frame = $("[data-ba]");
   $("[data-ba-title]").textContent = ba.title;
   $("[data-ba-text]").textContent = ba.text;
-  $("[data-ba-after]").src = ba.after || ba.single;
-  if (ba.single) { frame.classList.add("ba__frame--single"); $(".ba__before", frame).remove(); $$(".ba__tag, .ba__range, .ba__handle", frame).forEach((e) => e.remove()); }
-  else $("[data-ba-before]").src = ba.before;
+  if (ba.single && ba.mirror) {
+    /* Одно фото, где слева сторона «до», справа «после»: каждую сторону
+       отражаем зеркально — получаются два полных кадра для слайдера */
+    const mk = (img) => { const c = document.createElement("canvas"); c.className = "ba__canvas"; c.setAttribute("aria-label", img.alt); img.replaceWith(c); return c; };
+    const cBefore = mk($("[data-ba-before]")), cAfter = mk($("[data-ba-after]"));
+    const src = new Image();
+    src.onload = () => {
+      const W = src.naturalWidth, H = src.naturalHeight, cut = Math.round(W * (ba.cut || 0.49)), w = cut * 2;
+      const draw = (c, sx) => {
+        c.width = w; c.height = H;
+        const x = c.getContext("2d");
+        const side = sx === 0 ? "left" : "right";
+        if (side === "left") { x.drawImage(src, 0, 0, cut, H, 0, 0, cut, H); x.save(); x.translate(w, 0); x.scale(-1, 1); x.drawImage(src, 0, 0, cut, H, 0, 0, cut, H); x.restore(); }
+        else { x.drawImage(src, W - cut, 0, cut, H, cut, 0, cut, H); x.save(); x.translate(cut, 0); x.scale(-1, 1); x.drawImage(src, W - cut, 0, cut, H, 0, 0, cut, H); x.restore(); }
+        // убираем подписи в нижних углах исходного фото
+        const y0 = Math.round(H * (ba.labelTop || 0.8)), cw = Math.round(w * 0.38);
+        x.drawImage(c, 0, y0 - 2, cw, 2, 0, y0, cw, H - y0);
+        x.drawImage(c, w - cw, y0 - 2, cw, 2, w - cw, y0, cw, H - y0);
+        const g = x.createLinearGradient(0, H * 0.7, 0, H);
+        g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,.55)");
+        x.fillStyle = g; x.fillRect(0, H * 0.7, w, H * 0.3);
+      };
+      draw(cBefore, 0); draw(cAfter, 1);
+      frame.style.aspectRatio = `${w} / ${H}`;
+    };
+    src.src = ba.single;
+    frame.classList.add("ba__frame--mirror");
+  } else if (ba.single) {
+    $("[data-ba-after]").src = ba.single;
+    frame.classList.add("ba__frame--single"); $(".ba__before", frame).remove(); $$(".ba__tag, .ba__range, .ba__handle", frame).forEach((e) => e.remove());
+  } else { $("[data-ba-after]").src = ba.after; $("[data-ba-before]").src = ba.before; }
   $(".ba__range", frame)?.addEventListener("input", (e) => frame.style.setProperty("--pos", e.target.value + "%"));
   }
 
@@ -138,8 +166,15 @@
       ${m.name ? `<h3 class="master__name">${esc(m.name)}</h3>` : ""}${m.role ? `<p class="master__role">${esc(m.role)}</p>` : ""}
     </article>`).join("");
   const stepW = () => (track.firstElementChild?.offsetWidth || 300) + 20;
-  $("[data-m-next]").onclick = () => track.scrollBy({ left: stepW(), behavior: "smooth" });
-  $("[data-m-prev]").onclick = () => track.scrollBy({ left: -stepW(), behavior: "smooth" });
+  // по кругу: в конце — к началу, в начале — к концу
+  const slide = (dir) => {
+    const max = track.scrollWidth - track.clientWidth - 4;
+    if (dir > 0 && track.scrollLeft >= max) return track.scrollTo({ left: 0, behavior: "smooth" });
+    if (dir < 0 && track.scrollLeft <= 4) return track.scrollTo({ left: track.scrollWidth, behavior: "smooth" });
+    track.scrollBy({ left: dir * stepW(), behavior: "smooth" });
+  };
+  $("[data-m-next]").onclick = () => slide(1);
+  $("[data-m-prev]").onclick = () => slide(-1);
   if (fine) {
     let down = false, sx = 0, sl = 0;
     track.addEventListener("pointerdown", (e) => { down = true; sx = e.clientX; sl = track.scrollLeft; track.classList.add("is-drag"); });
@@ -148,7 +183,7 @@
     $$(".master__img", track).forEach((card) => {
       card.addEventListener("mousemove", (e) => {
         const r = card.getBoundingClientRect(), px = (e.clientX - r.left) / r.width - 0.5, py = (e.clientY - r.top) / r.height - 0.5;
-        card.style.transform = `perspective(800px) rotateY(${px * 8}deg) rotateX(${-py * 8}deg)`;
+        card.style.transform = `perspective(900px) rotateY(${px * 6}deg) rotateX(${-py * 6}deg)`;
       });
       card.addEventListener("mouseleave", () => (card.style.transform = ""));
     });
@@ -293,7 +328,7 @@
   const onScroll = () => {
     const y = scrollY, max = document.documentElement.scrollHeight - innerHeight;
     header.classList.toggle("is-scrolled", y > 30);
-    header.classList.toggle("is-hidden", y > lastY && y > 400 && !document.body.classList.contains("menu-open"));
+    
     bar.style.transform = `scaleX(${max > 0 ? y / max : 0})`;
     fab.classList.toggle("is-on", y > hero.offsetHeight * 0.8 && y < max - 900);
     if (!reduced && y < innerHeight * 1.2) par.forEach((el) => (el.style.transform = `translateY(${y * el.dataset.speed}px)`));
@@ -316,12 +351,6 @@
     io.unobserve(en.target);
   }), { threshold: 0.15 });
   $$(".reveal, .stat").forEach((el) => io.observe(el));
-
-  /* ---------- Магнитная кнопка ---------- */
-  if (fine && !reduced) $$(".magnetic").forEach((b) => {
-    b.addEventListener("mousemove", (e) => { const r = b.getBoundingClientRect(); b.style.transform = `translate(${(e.clientX - r.left - r.width / 2) * 0.25}px, ${(e.clientY - r.top - r.height / 2) * 0.35}px)`; });
-    b.addEventListener("mouseleave", () => (b.style.transform = ""));
-  });
 
   /* ---------- Старт ---------- */
   const start = () => setTimeout(() => document.body.classList.add("is-loaded"), reduced ? 0 : 900);

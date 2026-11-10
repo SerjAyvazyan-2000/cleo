@@ -507,3 +507,76 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 /* До/после одним кадром */
 .ba__frame--single { aspect-ratio: 1; max-width: 640px; justify-self: center; width: 100%; }
 @media (max-width: 520px) { .ba__frame--single { aspect-ratio: 1; } }
+
+
+/* ==========================================================================
+   Плавные ховеры без сдвигов страницы
+   ========================================================================== */
+html { scrollbar-gutter: stable; }
+
+/* Кнопки: стрелка двигается трансформом, ширина кнопки не меняется */
+.btn { transition: color .45s var(--ease), background-color .45s var(--ease), box-shadow .45s var(--ease); will-change: auto; }
+.btn::after { transition: transform .55s var(--ease); }
+.arrow { transition: transform .45s var(--ease); }
+.btn:hover .arrow { width: 18px; transform: translateX(6px); }
+.btn:active { transform: none; }
+.btn--accent:hover { color: #fff; }
+
+/* Ссылки и меню */
+.header__phone, .contacts__phone, .footer a, .socials a { transition: color .3s var(--ease); }
+.header__phone:hover, .contacts__phone:hover { color: var(--accent); }
+.nav a { transition: color .3s var(--ease); }
+.nav a:hover { color: var(--accent); }
+.logo { transition: opacity .3s var(--ease); }
+.logo:hover { opacity: .75; }
+.link-btn { transition: color .3s var(--ease); }
+.link-btn:hover { color: var(--accent); }
+.stat__label .link-under:hover { color: var(--accent); }
+
+/* Прайс: строка заливается, текст плавно сдвигается внутри — высота и ширина не меняются */
+.price, .price:hover { padding-inline: 0; }
+.price > * { transition: transform .5s var(--ease), color .3s; }
+.price:hover > * { transform: translateX(14px); }
+.price:hover > .price__cost, .price:hover > .price__time { transform: translateX(-14px); }
+.price::before { left: -12px; right: -12px; border-radius: 6px; }
+
+/* Вкладки и чипы */
+.tab { transition: background-color .3s var(--ease), color .3s var(--ease), box-shadow .3s var(--ease); }
+.chip span { transition: background-color .3s var(--ease), color .3s var(--ease), box-shadow .3s var(--ease), transform .4s var(--ease); }
+.chip span:hover { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--paper) 70%, transparent); }
+
+/* Бейдж первого экрана */
+.badge__dot { transition: transform .6s var(--ease), background-color .3s; }
+.badge:hover .badge__dot { transform: scale(1.25); }
+
+/* Слайдеры и стрелки */
+.slider-nav button { transition: background-color .3s var(--ease), color .3s var(--ease), box-shadow .3s var(--ease); }
+.slider-nav button:hover { background: var(--accent); color: #fff; box-shadow: inset 0 0 0 1px var(--accent); }
+.slider-nav--light button:hover { background: var(--accent); color: #fff; }
+
+/* Команда: шире карточки — есть что листать, наклон плавный */
+.masters__track { grid-auto-columns: minmax(270px, calc((100% - 40px) / 3)); scroll-behavior: smooth; }
+.master__img { transition: transform .35s var(--ease), box-shadow .4s var(--ease); }
+.master:hover .master__img { box-shadow: 0 24px 50px -24px rgb(0 0 0 / .45); }
+@media (max-width: 900px) { .masters__track { grid-auto-columns: 72%; } }
+@media (max-width: 520px) { .masters__track { grid-auto-columns: 82%; } }
+
+/* Портфолио */
+.gallery img { transition: transform 1s var(--ease), filter .5s var(--ease); }
+.gallery button:hover img { filter: brightness(.92); }
+
+/* FAQ и соцсети */
+.acc__q { transition: color .3s var(--ease); }
+.acc__q:hover { color: var(--accent); }
+.booking__links a { transition: background-color .3s var(--ease), color .3s var(--ease); }
+
+/* До / после: слайдер из одного фото */
+.ba__canvas { display: block; width: 100%; height: 100%; object-fit: cover; }
+.ba__frame--mirror { aspect-ratio: 1; max-width: 680px; width: 100%; justify-self: center; touch-action: pan-y; }
+.ba__frame--mirror .ba__before { overflow: hidden; }
+.ba__handle i { transition: transform .3s var(--ease); }
+.ba__frame:hover .ba__handle i { transform: translate(-50%, -50%) scale(1.08); }
+
+@media (hover: none) {
+  .price:hover > *, .price:hover > .price__cost, .price:hover > .price__time { transform: none; }
+}
