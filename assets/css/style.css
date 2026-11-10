@@ -503,3 +503,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 @media (max-width: 900px) { .hero--text { min-height: auto; padding-bottom: 72px; } }
 .hero--text { padding-bottom: clamp(150px, 19vw, 300px); }
 @media (max-width: 900px) { .hero--text { padding-bottom: clamp(110px, 26vw, 170px); } }
+
+/* До/после одним кадром */
+.ba__frame--single { aspect-ratio: 1; max-width: 640px; justify-self: center; width: 100%; }
+@media (max-width: 520px) { .ba__frame--single { aspect-ratio: 1; } }

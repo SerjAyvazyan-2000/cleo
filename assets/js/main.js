@@ -44,7 +44,7 @@
   if (H.images && H.images.length) $$(".hero__img").forEach((f, i) => (f.style.backgroundImage = `url("${H.images[i % H.images.length]}")`));
   else { $(".hero__media").remove(); $(".hero").classList.add("hero--text"); }
   if ($("[data-badge]")) $("[data-badge]").textContent = H.badge;
-  $("[data-hero-visit]").innerHTML = `<span><b>${esc(S.contacts.address)}</b></span><span>Ежедневно <b>${esc(S.contacts.hours[0][1])}</b></span><a href="tel:${esc(S.contacts.phoneRaw)}"><b>${esc(S.contacts.phone)}</b></a>`;
+  if (!H.visitLine) $("[data-hero-visit]").remove(); else $("[data-hero-visit]").innerHTML = `<span><b>${esc(S.contacts.address)}</b></span><span>Ежедневно <b>${esc(S.contacts.hours[0][1])}</b></span><a href="tel:${esc(S.contacts.phoneRaw)}"><b>${esc(S.contacts.phone)}</b></a>`;
   $("[data-price-note]").textContent = S.priceNote || "";
 
   /* ---------- Бегущая строка ---------- */
@@ -123,9 +123,10 @@
   const ba = S.beforeAfter, frame = $("[data-ba]");
   $("[data-ba-title]").textContent = ba.title;
   $("[data-ba-text]").textContent = ba.text;
-  $("[data-ba-before]").src = ba.before;
-  $("[data-ba-after]").src = ba.after;
-  $(".ba__range", frame).addEventListener("input", (e) => frame.style.setProperty("--pos", e.target.value + "%"));
+  $("[data-ba-after]").src = ba.after || ba.single;
+  if (ba.single) { frame.classList.add("ba__frame--single"); $(".ba__before", frame).remove(); $$(".ba__tag, .ba__range, .ba__handle", frame).forEach((e) => e.remove()); }
+  else $("[data-ba-before]").src = ba.before;
+  $(".ba__range", frame)?.addEventListener("input", (e) => frame.style.setProperty("--pos", e.target.value + "%"));
   }
 
   /* ---------- Мастера ---------- */
@@ -133,8 +134,8 @@
   const track = $("[data-masters]");
   track.innerHTML = S.masters.map((m) => `
     <article class="master">
-      <div class="master__img"><img src="${esc(m.img)}" alt="${esc(m.name)}"><span class="master__exp">Опыт ${esc(m.exp)}</span></div>
-      <h3 class="master__name">${esc(m.name)}</h3><p class="master__role">${esc(m.role)}</p>
+      <div class="master__img"><img src="${esc(m.img)}" alt="${esc(m.name || m.role || "Мастер салона")}" loading="lazy">${m.exp ? `<span class="master__exp">Опыт ${esc(m.exp)}</span>` : ""}</div>
+      ${m.name ? `<h3 class="master__name">${esc(m.name)}</h3>` : ""}${m.role ? `<p class="master__role">${esc(m.role)}</p>` : ""}
     </article>`).join("");
   const stepW = () => (track.firstElementChild?.offsetWidth || 300) + 20;
   $("[data-m-next]").onclick = () => track.scrollBy({ left: stepW(), behavior: "smooth" });
@@ -172,7 +173,7 @@
   stack.innerHTML = S.reviews.map((r) => `
     <article class="review">
       <p class="review__text">«${esc(r.text)}»</p>
-      <div class="review__who"><div><div class="review__name">${esc(r.name)}</div><div class="review__svc">${esc(r.service)}</div></div>
+      <div class="review__who"><div><div class="review__name">${esc(r.name)}</div><div class="review__svc">${esc(r.service)}${r.source ? ` · ${esc(r.source)}` : ""}</div></div>
       <div class="review__stars" aria-label="Оценка ${r.rating} из 5">${"★".repeat(r.rating)}</div></div>
     </article>`).join("");
   const cards = $$(".review", stack);
