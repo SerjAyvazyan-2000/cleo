@@ -139,8 +139,10 @@
         else { x.drawImage(src, W - cut, 0, cut, H, cut, 0, cut, H); x.save(); x.translate(cut, 0); x.scale(-1, 1); x.drawImage(src, W - cut, 0, cut, H, 0, 0, cut, H); x.restore(); }
         // убираем подписи в нижних углах исходного фото
         const y0 = Math.round(H * (ba.labelTop || 0.8)), cw = Math.round(w * 0.38);
-        x.drawImage(c, 0, y0 - 2, cw, 2, 0, y0, cw, H - y0);
-        x.drawImage(c, w - cw, y0 - 2, cw, 2, w - cw, y0, cw, H - y0);
+        x.save(); x.filter = "blur(14px)";
+        x.drawImage(c, 0, y0 - 40, cw, 40, 0, y0 - 10, cw, H - y0 + 20);
+        x.drawImage(c, w - cw, y0 - 40, cw, 40, w - cw, y0 - 10, cw, H - y0 + 20);
+        x.restore();
         const g = x.createLinearGradient(0, H * 0.7, 0, H);
         g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,.55)");
         x.fillStyle = g; x.fillRect(0, H * 0.7, w, H * 0.3);
