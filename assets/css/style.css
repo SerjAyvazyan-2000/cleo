@@ -555,7 +555,7 @@ html { scrollbar-gutter: stable; }
 .slider-nav--light button:hover { background: var(--accent); color: #fff; }
 
 /* Команда: шире карточки — есть что листать, наклон плавный */
-.masters__track { grid-auto-columns: minmax(270px, calc((100% - 40px) / 3)); scroll-behavior: smooth; }
+.masters__track { grid-auto-columns: max(270px, calc((100% - 40px) / 3)); scroll-behavior: smooth; }
 .master__img { transition: transform .35s var(--ease), box-shadow .4s var(--ease); }
 .master:hover .master__img { box-shadow: 0 24px 50px -24px rgb(0 0 0 / .45); }
 @media (max-width: 900px) { .masters__track { grid-auto-columns: 72%; } }
